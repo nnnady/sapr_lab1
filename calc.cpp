@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <cmath>
 
 double add(double a, double b) { return a + b; }
 double sub(double a, double b) { return a - b; }
@@ -13,6 +14,9 @@ double divide(double a, double b)
     return a / b;
 }
 
+// Возведение в степень (добавлено в ветке feature-power)
+double power(double a, double b) { return std::pow(a, b); }
+
 // Выбор операции по символу
 double calculate(double a, char op, double b)
 {
@@ -22,6 +26,7 @@ double calculate(double a, char op, double b)
         case '-': return sub(a, b);
         case '*': return mul(a, b);
         case '/': return divide(a, b);
+        case '^': return power(a, b);
         default:  throw std::runtime_error(std::string("unknown operation: ") + op);
     }
 }
