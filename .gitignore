@@ -1,0 +1,12 @@
+# exe
+calc
+*.exe
+*.o
+*.obj
+
+# файлы ModelSim / iverilog
+work/
+transcript
+*.wlf
+*.vstf
+apb_sim
