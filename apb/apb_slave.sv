@@ -14,6 +14,9 @@ module apb_slave
 );
 
 logic [31:0] register_with_some_name;   // 32-битный регистр по адресу 0x0
+logic [31:0] reg_date;                  // регистр по адресу 0x4 - дата
+logic [31:0] reg_surname;               // регистр по адресу 0x8 - фамилия
+logic [31:0] reg_name;                  // регистр по адресу 0xC - имя
 
 //APB FSM - конечный автомат, у него 3 состояния
 enum logic [1:0] {
@@ -30,6 +33,9 @@ begin
   pslverr <= 1'b0;
   pready <= 1'b0;
   register_with_some_name <= 32'h0;
+  reg_date <= 32'h0;
+  reg_surname <= 32'h0;
+  reg_name <= 32'h0;
   apb_st <= APB_SETUP;
 end
 else                     // если сброса нет - работаем
@@ -40,7 +46,7 @@ begin
       // clear the prdata and error
       prdata <= '0;
       pready <= 1'b0;
-      pslverr <= 1'b0;   // исправлено: ошибку тоже сбрасываем, в заготовке ее не сбрасывали
+      pslverr <= 1'b0;   // исправлено: ошибку тоже сбрасываем
       // Move to ENABLE when the psel is asserted
       if (psel && !penable)       // мастер выбрал нас (psel = 1), первая фаза
       begin
@@ -73,12 +79,19 @@ begin
             $display("[%0t] SLAVE: write 0x%h to addr 0x%h", $time, pwdata, paddr);
           end
           8'h4: begin
-            // запись в регистр со смещением 4 (пока регистра нет)
-            $display("[%0t] SLAVE: write 0x%h to addr 0x%h", $time, pwdata, paddr);
+            // запись даты
+            reg_date <= pwdata;
+            $display("[%0t] SLAVE: write 0x%h to addr 0x%h (date)", $time, pwdata, paddr);
           end
           8'h8: begin
-            // запись в регистр со смещением 8 (пока регистра нет)
-            $display("[%0t] SLAVE: write 0x%h to addr 0x%h", $time, pwdata, paddr);
+            // запись фамилии, %s выводит число как текст из 4 букв
+            reg_surname <= pwdata;
+            $display("[%0t] SLAVE: write 0x%h to addr 0x%h (%s)", $time, pwdata, paddr, pwdata);
+          end
+          8'hC: begin
+            // запись имени
+            reg_name <= pwdata;
+            $display("[%0t] SLAVE: write 0x%h to addr 0x%h (%s)", $time, pwdata, paddr, pwdata);
           end
           default:                     // любой другой адрес - такого регистра нет
           begin
@@ -102,12 +115,16 @@ begin
             $display("[%0t] SLAVE: read addr 0x%h, data 0x%h", $time, paddr, register_with_some_name);
           end
           8'h4: begin
-            // чтение из регистра со смещением 4 (пока регистра нет)
-            $display("[%0t] SLAVE: read addr 0x%h", $time, paddr);
+            prdata <= reg_date;        // отдаем дату
+            $display("[%0t] SLAVE: read addr 0x%h, data 0x%h", $time, paddr, reg_date);
           end
           8'h8: begin
-            // чтение из регистра со смещением 8 (пока регистра нет)
-            $display("[%0t] SLAVE: read addr 0x%h", $time, paddr);
+            prdata <= reg_surname;     // отдаем фамилию
+            $display("[%0t] SLAVE: read addr 0x%h, data 0x%h", $time, paddr, reg_surname);
+          end
+          8'hC: begin
+            prdata <= reg_name;        // отдаем имя
+            $display("[%0t] SLAVE: read addr 0x%h, data 0x%h", $time, paddr, reg_name);
           end
           default:                     // неверный адрес
           begin

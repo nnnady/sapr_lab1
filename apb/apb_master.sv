@@ -1,7 +1,7 @@
 // мастер APB
 // мастер - это устройство, которое начинает обмен: говорит слейву адрес,
 // что делать (запись или чтение) и передает данные.
-`timescale 1ns/1ps
+`timescale 1ns/1ps   // единица времени 1 нс, точность 1 пс
 
 module apb_master
 (
@@ -44,7 +44,7 @@ task automatic apb_write(input logic [31:0] addr, input logic [31:0] data);
   wait (pready == 1'b1);                    // ждем, пока слейв ответит, что готов
   @(posedge pclk);
   if (pslverr)                              // если слейв выставил ошибку - пишем сообщение
-    $display("[%0t] MASTER: ошибка при записи по адресу 0x%h", $time, addr);
+    $display("[%0t] MASTER: error on write, addr 0x%h", $time, addr);
   // запись закончена, снимаем сигналы
   psel <= 1'b0;
   penable <= 1'b0;
@@ -67,7 +67,7 @@ task automatic apb_read(input logic [31:0] addr, output logic [31:0] data);
   wait (pready == 1'b1);                    // ждем ответ слейва
   @(posedge pclk);
   if (pslverr)
-    $display("[%0t] MASTER: ошибка при чтении по адресу 0x%h", $time, addr);
+    $display("[%0t] MASTER: error on read, addr 0x%h", $time, addr);
   data = prdata;                            // запоминаем прочитанные данные
   // чтение закончено, снимаем сигналы
   psel <= 1'b0;
